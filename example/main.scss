@@ -1,0 +1,103 @@
+$controls-color: #ADB5B9;
+$border-color: #C2CACF;
+
+* {
+  box-sizing: border-box;
+}
+
+.wysiwyg-editor {
+  display: block;
+  width: 400px;
+  margin: 100px auto 0;
+}
+
+.wysiwyg-controls {
+  display: block;
+  width: 100%;
+  padding: 12px 6px;
+  border: 1px solid $border-color;
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  background: #fff;
+  
+  a {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    vertical-align: top;
+    line-height: 38px;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+    color: $controls-color;
+  }
+  [data-role="bold"] {
+    font-weight: bold;
+  }
+  [data-role="italic"] {
+    font-style: italic;
+  }
+  [data-role="underline"] {
+    text-decoration: underline;
+  }
+}
+
+[class^="menu"] {
+  position: relative;
+  top: 48%;
+  
+  display: block;
+  width: 65%;
+  height: 2px;
+  margin: 0 auto;
+  background: $controls-color;
+  
+  &:before {
+    @extend [class^="menu"];
+    content: '';
+    top: -5px;
+    width: 80%;
+  }
+  &:after {
+    @extend [class^="menu"];
+    content: '';
+    top: 3px;
+    width: 80%;
+  }
+}
+.menu-left {
+  &:before, &:after {
+    margin-right: 4px;
+  }
+}
+.menu-right {
+  &:before, &:after {
+    margin-left: 4px;
+  }
+}
+
+.menu-justify {
+  &:before, &:after {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+.wysiwyg-content {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  padding: 12px;
+  resize: both;
+  overflow: auto;
+  font-family: Helvetica, sans-serif;
+  font-size: 12px;
+  border: 1px solid $border-color;
+  border-radius: 0 0 3px 3px;
+  background: #F2F4F6;
+}
+
+.current-html {
+  max-width: 400px;
+  margin: 24px auto;
+}

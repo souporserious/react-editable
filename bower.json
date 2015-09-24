@@ -1,0 +1,25 @@
+{
+  "name": "react-editable",
+  "version": "0.0.1",
+  "homepage": "https://github.com/souporserious/react-editable",
+  "authors": [
+    "Travis Arnold <ftntravis@gmail.com>"
+  ],
+  "description": "Build flexible WYSIWYG editors with ease.",
+  "main": ["./dist/react-editable.js"],
+  "keywords": [
+    "react",
+    "component",
+    "edit",
+    "editable",
+    "wysiwyg"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
