@@ -1,9 +1,15 @@
 import React, { Component, Children, PropTypes } from 'react';
 import { Editable, utils } from '../src/react-editable';
 
-const { getCaretCoords, stripHTML } = utils
+const { getCaret, stripHTML } = utils
 
 import './main.scss';
+
+const COMMAND_ALIASES = {
+  B: 'bold',
+  I: 'italic',
+  U: 'underline'
+}
 
 // TODOS:
 // need IE support for HTML insertion
@@ -77,39 +83,40 @@ FontSize.defaultProps = {
 }
 
 class App extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      html:
-      `
-        <b>Let's make a statement!</b>
-        <br/>
-        <i>This is an italicized sentence.</i>
-        <br/>
-        <u>Very important information.</u>
-      `
-    }
-    this._handleClear = this._handleClear.bind(this)
-    this._handleOnChange = this._handleOnChange.bind(this)
+  state = {
+    html:
+    `
+      <b>Let's make a statement!</b>
+      <br/>
+      <i>This is an italicized sentence.</i>
+      <br/>
+      <u>Very important information.</u>
+    `,
+    selection: window.getSelection()
   }
   
   _exec(role, value = null) {
     document.execCommand(role, false, value);
   }
   
-  _handleClear(e) {
+  _handleClear = (e) => {
     this.setState({html: ''})
   }
   
-  _handleOnChange(e) {
+  _handleOnChange = (e) => {
     const node = e.target
     const html = node.value
     this.setState({html})
   }
 
-  _handleKeyUp(e) {
-    const caretCoords = getCaretCoords(e.target)
-    const currentChar = stripHTML(e.target.innerHTML).substr(caretCoords.offset-1, 1)
+  _handleKeyUp = (e) => {
+    const caret = getCaret(e.target)
+    const currentChar = stripHTML(e.target.innerHTML).substr(caret.offset-1, 1)
+    console.log(currentChar)
+  }
+
+  _handleMouseUp = (e, selection) => {
+    console.log(selection.nodeName);
   }
   
   render() {
@@ -143,19 +150,20 @@ class App extends React.Component {
             html={this.state.html}
             onChange={this._handleOnChange}
             onKeyUp={this._handleKeyUp}
+            onMouseUp={this._handleMouseUp}
           />
         </div>
         <div className="current-html">
-          <p>
-            <strong>word count:</strong> {this.state.html.split(' ').length}
-          </p>
           <p>
             <strong>raw html:</strong>
             <textarea
               style={{width: '100%', height: 150}}
               value={this.state.html}
-              onChange={e => this._handleOnChange(e.target.value)}
+              onChange={this._handleOnChange}
             />
+          </p>
+          <p>
+            <strong>word count:</strong> {stripHTML(this.state.html).split(' ').length}
           </p>
           <button onClick={this._handleClear}>Clear Content</button>
         </div>

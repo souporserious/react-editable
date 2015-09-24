@@ -1,7 +1,7 @@
 import Editable from './Editable'
-import getCaretCoords from './get-caret-coords'
+import getCaret from './get-caret-coords'
 import stripHTML from './strip-html'
 
-const utils = { getCaretCoords, stripHTML }
+const utils = { getCaret, stripHTML }
 
 export { Editable, utils };

@@ -1,4 +1,5 @@
 import React, { Component, PropTypes } from 'react'
+import getSelectionNode from './get-selection-node'
 
 class Editable extends React.Component {
   static propTypes = {
@@ -17,7 +18,8 @@ class Editable extends React.Component {
   _lastHTML = ''
 
   shouldComponentUpdate(nextProps) {
-    return this._node.innerHTML !== nextProps.html
+    return this.props.editable !== nextProps.editable ||
+           this._node.innerHTML !== nextProps.html
   }
 
   componentDidMount() {
@@ -45,6 +47,27 @@ class Editable extends React.Component {
 
     this._lastHTML = html
   }
+
+  _mouseChange = (type, e) => {
+    let selection = null
+
+    if(e.type === 'mousedown') {
+      this._dragging = true
+    }
+
+    if(this._dragging) {
+      selection = getSelectionNode(document.getSelection())
+    }
+
+    if(e.type === 'mouseup') {
+      this._dragging = false
+    }
+
+    // call desired event if requested
+    if(this.props[type]) {
+      this.props[type](e, selection)
+    }
+  }
   
   render() {
     const { editable, html, placeholder } = this.props
@@ -56,6 +79,9 @@ class Editable extends React.Component {
         contentEditable: editable,
         onBlur: this._emitChange.bind(null, 'onBlur'),
         onInput: this._emitChange.bind(null, 'onInput'),
+        onMouseDown: this._mouseChange.bind(null, 'onMouseDown'),
+        onMouseMove: this._mouseChange.bind(null, 'onMouseMove'),
+        onMouseUp: this._mouseChange.bind(null, 'onMouseUp'),
         dangerouslySetInnerHTML: {__html: html},
         'data-placeholder': placeholder
       }
