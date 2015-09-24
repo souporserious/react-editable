@@ -1,52 +1,66 @@
-import React, { Component, Children, PropTypes } from 'react'
+import React, { Component, PropTypes } from 'react'
 
 class Editable extends React.Component {
-  constructor() {
-    super()
-    this._node = ''
-    this._lastHTML = ''
-    this._emitChange = this._emitChange.bind(this)
+  static propTypes = {
+    component: PropTypes.string,
+    editable: PropTypes.bool,
+    placeholder: PropTypes.string,
+    onChange: PropTypes.func
   }
-  
+  static defaultProps = {
+    component: 'div',
+    editable: true,
+    placeholder: '',
+    onChange: () => null
+  }
+  _node = null
+  _lastHTML = ''
+
   shouldComponentUpdate(nextProps) {
     return this._node.innerHTML !== nextProps.html
+  }
+
+  componentDidMount() {
+    this._node = React.findDOMNode(this)
   }
   
   componentDidUpdate() {
     if(this._node.innerHTML !== this.props.html) {
-      this._node.innerHTML = this.props.html;
+      this._node.innerHTML = this.props.html
     }
   }
   
-  _emitChange(e) {
-    const html = e.target.innerHTML
-    
-    if(this.props.onChange && html !== this._lastHTML) {
-      this.props.onChange(e.target.innerHTML, e)
+  _emitChange = (type, e) => {
+    const html = this._node.innerHTML
+
+    if(html !== this._lastHTML) {
+      e.target.value = html
+      this.props.onChange(e)
     }
+
+    // call desired event if requested
+    if(this.props[type]) {
+      this.props[type](e)
+    }
+
     this._lastHTML = html
   }
   
   render() {
-    const { editable, html } = this.props
+    const { editable, html, placeholder } = this.props
     
     return React.createElement(
       this.props.component,
       {
         ...this.props,
-        ref: c => this._node = React.findDOMNode(c),
         contentEditable: editable,
-        onInput: this._emitChange,
-        onBlur: this._emitChange,
-        dangerouslySetInnerHTML: {__html: html}
+        onBlur: this._emitChange.bind(null, 'onBlur'),
+        onInput: this._emitChange.bind(null, 'onInput'),
+        dangerouslySetInnerHTML: {__html: html},
+        'data-placeholder': placeholder
       }
     )
   }
-}
-
-Editable.defaultProps = {
-  component: 'div',
-  editable: true
 }
 
 export default Editable

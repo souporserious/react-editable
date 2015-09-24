@@ -1,6 +1,6 @@
 {
   "name": "react-editable",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "description": "Build flexible WYSIWYG editors with ease.",
   "main": "lib/react-editable.js",
   "scripts": {

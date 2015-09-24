@@ -1,35 +1,17 @@
 import React, { Component, Children, PropTypes } from 'react';
-import Editable from '../src/editable';
+import { Editable, utils } from '../src/react-editable';
+
+const { getCaretCoords, stripHTML } = utils
 
 import './main.scss';
 
-/*
-sources:
-https://developer.mozilla.org/en-US/docs/Rich-Text_Editing_in_Mozilla#Executing_Commands
-https://developer.mozilla.org/en-US/docs/Web/API/document.execCommand
-http://stackoverflow.com/a/27255103/1461204
-
-Allow placeholder in content editable
-[contenteditable="true"] {
-cursor: text;
-color: #212121;
-
-&:empty::after {
-  color: #a0a0a0;
-  font-style: italic;
-  content: attr(data-placeholder);    
-}
-}*/
-
-function getSelectionText() {
-  let text = '';
-  if(window.getSelection) {
-    text = window.getSelection().toString();
-  } else if(document.selection && document.selection.type !== "Control") {
-    text = document.selection.createRange().text;
-  }
-  return text;
-}
+// TODOS:
+// need IE support for HTML insertion
+// figure out how to build control components
+// thinking something along the lines of this:
+// <Bold render={(icon) => <div>{icon}</div>}/>
+// maybe a list of controls could be like:
+// renderControls('Cool', 'This').map(control => <li>{control.icon}</li>)
 
 class Formatting extends React.Component {
   constructor(props) {
@@ -112,7 +94,6 @@ class App extends React.Component {
   }
   
   _exec(role, value = null) {
-    console.log(role, value);
     document.execCommand(role, false, value);
   }
   
@@ -120,8 +101,15 @@ class App extends React.Component {
     this.setState({html: ''})
   }
   
-  _handleOnChange(html) {
+  _handleOnChange(e) {
+    const node = e.target
+    const html = node.value
     this.setState({html})
+  }
+
+  _handleKeyUp(e) {
+    const caretCoords = getCaretCoords(e.target)
+    const currentChar = stripHTML(e.target.innerHTML).substr(caretCoords.offset-1, 1)
   }
   
   render() {
@@ -129,7 +117,9 @@ class App extends React.Component {
       <div>
         <div className="wysiwyg-editor">
           <div className="wysiwyg-controls">
+            <a href='#' onClick={() => this._exec('foreColor', 'red')}>red</a>
             <a href='#' onClick={() => this._exec('bold')} title="⌘B">B</a>
+            <a href='#' onClick={() => this._exec('insertHTML', 'WHAT')} title="⌘B">insertHTML</a>
             <a href='#' onClick={() => this._exec('italic')}>I</a>
             <a href='#' onClick={() => this._exec('underline')}>U</a>
             <a href='#' onClick={() => this._exec('strikeThrough')}>S</a>
@@ -152,6 +142,7 @@ class App extends React.Component {
             className="wysiwyg-content"
             html={this.state.html}
             onChange={this._handleOnChange}
+            onKeyUp={this._handleKeyUp}
           />
         </div>
         <div className="current-html">

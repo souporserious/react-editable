@@ -66,8 +66,18 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _Editable2 = _interopRequireDefault(_Editable);
 
-	exports['default'] = _Editable2['default'];
-	module.exports = exports['default'];
+	var _getCaretCoords = __webpack_require__(3);
+
+	var _getCaretCoords2 = _interopRequireDefault(_getCaretCoords);
+
+	var _stripHtml = __webpack_require__(4);
+
+	var _stripHtml2 = _interopRequireDefault(_stripHtml);
+
+	var utils = { getCaretCoords: _getCaretCoords2['default'], stripHTML: _stripHtml2['default'] };
+
+	exports.Editable = _Editable2['default'];
+	exports.utils = utils;
 
 /***/ },
 /* 1 */
@@ -99,18 +109,41 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _inherits(Editable, _React$Component);
 
 	  function Editable() {
+	    var _this = this;
+
 	    _classCallCheck(this, Editable);
 
-	    _get(Object.getPrototypeOf(Editable.prototype), 'constructor', this).call(this);
-	    this._node = '';
+	    _get(Object.getPrototypeOf(Editable.prototype), 'constructor', this).apply(this, arguments);
+
+	    this._node = null;
 	    this._lastHTML = '';
-	    this._emitChange = this._emitChange.bind(this);
+
+	    this._emitChange = function (type, e) {
+	      var html = _this._node.innerHTML;
+
+	      if (html !== _this._lastHTML) {
+	        e.target.value = html;
+	        _this.props.onChange(e);
+	      }
+
+	      // call desired event if requested
+	      if (_this.props[type]) {
+	        _this.props[type](e);
+	      }
+
+	      _this._lastHTML = html;
+	    };
 	  }
 
 	  _createClass(Editable, [{
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps) {
 	      return this._node.innerHTML !== nextProps.html;
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      this._node = _react2['default'].findDOMNode(this);
 	    }
 	  }, {
 	    key: 'componentDidUpdate',
@@ -120,43 +153,45 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	    }
 	  }, {
-	    key: '_emitChange',
-	    value: function _emitChange(e) {
-	      var html = e.target.innerHTML;
-
-	      if (this.props.onChange && html !== this._lastHTML) {
-	        this.props.onChange(e.target.innerHTML, e);
-	      }
-	      this._lastHTML = html;
-	    }
-	  }, {
 	    key: 'render',
 	    value: function render() {
-	      var _this = this;
-
 	      var _props = this.props;
 	      var editable = _props.editable;
 	      var html = _props.html;
+	      var placeholder = _props.placeholder;
 
 	      return _react2['default'].createElement(this.props.component, _extends({}, this.props, {
-	        ref: function ref(c) {
-	          return _this._node = _react2['default'].findDOMNode(c);
-	        },
 	        contentEditable: editable,
-	        onInput: this._emitChange,
-	        onBlur: this._emitChange,
-	        dangerouslySetInnerHTML: { __html: html }
+	        onBlur: this._emitChange.bind(null, 'onBlur'),
+	        onInput: this._emitChange.bind(null, 'onInput'),
+	        dangerouslySetInnerHTML: { __html: html },
+	        'data-placeholder': placeholder
 	      }));
 	    }
+	  }], [{
+	    key: 'propTypes',
+	    value: {
+	      component: _react.PropTypes.string,
+	      editable: _react.PropTypes.bool,
+	      placeholder: _react.PropTypes.string,
+	      onChange: _react.PropTypes.func
+	    },
+	    enumerable: true
+	  }, {
+	    key: 'defaultProps',
+	    value: {
+	      component: 'div',
+	      editable: true,
+	      placeholder: '',
+	      onChange: function onChange() {
+	        return null;
+	      }
+	    },
+	    enumerable: true
 	  }]);
 
 	  return Editable;
 	})(_react2['default'].Component);
-
-	Editable.defaultProps = {
-	  component: 'div',
-	  editable: true
-	};
 
 	exports['default'] = Editable;
 	module.exports = exports['default'];
@@ -166,6 +201,63 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_2__;
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports["default"] = getCaretCoords;
+
+	function getCaretCoords(node) {
+	  var selection = window.getSelection();
+	  var range = selection.getRangeAt(0);
+	  var preCaretRange = range.cloneRange();
+	  var preCoordRange = range.cloneRange();
+	  var top = 0;
+	  var left = 0;
+
+	  preCaretRange.selectNodeContents(node);
+	  preCaretRange.setEnd(range.endContainer, range.endOffset);
+
+	  if (preCoordRange.getClientRects()) {
+	    preCoordRange.collapse(true);
+	    var rect = preCoordRange.getClientRects()[0];
+	    top = rect.top;
+	    left = rect.left;
+	  }
+
+	  return {
+	    offset: preCaretRange.toString().length || 0,
+	    top: top,
+	    left: left
+	  };
+	}
+
+	module.exports = exports["default"];
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, '__esModule', {
+	   value: true
+	});
+	exports['default'] = stripHTML;
+
+	function stripHTML(html) {
+	   var div = document.createElement('div');
+	   div.innerHTML = html;
+	   return div.textContent || div.innerText || '';
+	}
+
+	module.exports = exports['default'];
 
 /***/ }
 /******/ ])
