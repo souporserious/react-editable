@@ -1,85 +1,128 @@
-import React, { Component, Children, PropTypes } from 'react';
-import { Editable, utils } from '../src/react-editable';
-
-const { getCaret, stripHTML } = utils
+import React, { Component, Children, PropTypes, createElement } from 'react'
+import Command from './Command'
+import Color from './Color'
+import Size from './Size'
+import Align from './Align'
+import { Editable, Icons, utils } from '../src/react-editable'
+const { getCaret, getCurrentStyles, stripHTML } = utils
 
 import './main.scss';
 
-const COMMAND_ALIASES = {
-  B: 'bold',
-  I: 'italic',
-  U: 'underline'
-}
-
-// TODOS:
-// need IE support for HTML insertion
-// figure out how to build control components
-// thinking something along the lines of this:
-// <Bold render={(icon) => <div>{icon}</div>}/>
-// maybe a list of controls could be like:
-// renderControls('Cool', 'This').map(control => <li>{control.icon}</li>)
-
-class Formatting extends React.Component {
-  constructor(props) {
-    super(props)
-    this._handleOnChange = this._handleOnChange.bind(this)
+class WYSIWYG extends React.Component {
+  state = {
+    selection: window.getSelection(),
+    currentStyles: []
   }
   
-  _handleOnChange(e) {
-    this.props.onChange('formatBlock', '<'+ e.target.value +'>')
+  _exec(role, value = null) {
+    document.execCommand(role, false, value);
+  }
+
+  _onChange(html) {
+    this.props.onChange(html)
   }
   
+  _handleClear = (e) => {
+    this._onChange('')
+  }
+  
+  _handleOnChange = (html, selection) => {
+    const currentStyles = getCurrentStyles(selection, React.findDOMNode(this.refs['editor']))
+    //console.log(currentStyles)
+    //this.setState({currentStyles})
+    this._onChange(html)
+  }
+
+  _handleOnTextAreaChange = (e) => {
+    this._onChange(e.target.value)
+  }
+
+  _handleKeyUp = (e) => {
+    const caret = getCaret(e.target)
+    const currentChar = stripHTML(e.target.innerHTML).substr(caret.offset-1, 1)
+    //console.log(currentChar)
+  }
+
+  _handleMouseUp = (e, selection) => {
+    const currentStyles = getCurrentStyles(selection, React.findDOMNode(this.refs['editor']))
+    //this.setState({currentStyles})
+  }
+
   render() {
-    const formats = ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'pre']
-    
+    const { currentStyles } = this.state
+
     return(
-      <select {...this.props} onChange={this._handleOnChange}>
-        <option selected disabled>Formatting</option>
-        {formats.map(format =>
-          <option key={format} value={format}>
-            {React.createElement(format, null, format)}
-          </option>
-        )}
-      </select>
+      <div className="wysiwyg-editor">
+        <div className="wysiwyg-controls">
+          <Size
+            onChange={value => this._exec('fontSize', value)}
+          />
+          <Command
+            active={currentStyles}
+            role="bold"
+            title="⌘B"
+          />
+          <Command
+            active={currentStyles}
+            role="italic"
+            title="⌘I"
+          />
+          <Command
+            active={currentStyles}
+            role="underline"
+            title="⌘U"
+          />
+          <Command
+            active={currentStyles}
+            role="strikeThrough"
+            title="⌘S"
+          />
+          <Align
+            onChange={role => this._exec(role)}
+          />
+          <Command
+            active={currentStyles}
+            role="insertOrderedList"
+          />
+          <Command
+            active={currentStyles}
+            role="insertUnorderedList"
+          />
+          <Command
+            active={currentStyles}
+            role="outdent"
+          />
+          <Command
+            active={currentStyles}
+            role="indent"
+          />
+          <Color
+            onChange={(role, value) => this._exec(role, value)}
+          />
+          <Icons.CreateLink 
+            onMouseDown={(e) => {
+              e.preventDefault()
+              this._exec('createLink', prompt('Please enter a URL', 'http://'))
+            }}
+          />
+          <Icons.Blockquote />
+          <Command
+            active={currentStyles}
+            role="removeFormat"
+          />
+        </div>
+        <Editable
+          ref="editor"
+          className="wysiwyg-content"
+          html={this.props.html}
+          onChange={this._handleOnChange}
+          onKeyUp={this._handleKeyUp}
+          onMouseUp={this._handleMouseUp}
+          onBlur={() => this.setState({currentStyles: []})}
+        />
+      </div>
     )
   }
-}
-
-class FontSize extends React.Component {
-  constructor(props) {
-    super(props)
-    this._handleOnChange = this._handleOnChange.bind(this)
-  }
-  
-  _handleOnChange(e) {
-    this.props.onChange('fontSize', e.target.value)
-  }
-  
-  _getFontSizes() {
-    const { smallest, biggest } = this.props
-    let total = biggest
-    let sizes = []
-    
-    for(let i = smallest; i <= total; i++) {
-      sizes.push(<option key={i} value={i}>{i}</option>)
-    }
-    
-    return sizes
-  }
-  
-  render() {
-    return(
-      <select {...this.props} onChange={this._handleOnChange}>
-        <option selected disabled>Font Size</option>
-        {this._getFontSizes()}
-      </select>
-    )
-  }
-}
-
-FontSize.defaultProps = {
-  smallest: 1,
-  biggest: 7
 }
 
 class App extends React.Component {
@@ -92,74 +135,24 @@ class App extends React.Component {
       <br/>
       <u>Very important information.</u>
     `,
-    selection: window.getSelection()
-  }
-  
-  _exec(role, value = null) {
-    document.execCommand(role, false, value);
-  }
-  
-  _handleClear = (e) => {
-    this.setState({html: ''})
-  }
-  
-  _handleOnChange = (e) => {
-    const node = e.target
-    const html = node.value
-    this.setState({html})
+    selection: window.getSelection(),
+    currentStyles: []
   }
 
-  _handleKeyUp = (e) => {
-    const caret = getCaret(e.target)
-    const currentChar = stripHTML(e.target.innerHTML).substr(caret.offset-1, 1)
-    console.log(currentChar)
-  }
-
-  _handleMouseUp = (e, selection) => {
-    console.log(selection.nodeName);
-  }
-  
   render() {
     return(
       <div>
-        <div className="wysiwyg-editor">
-          <div className="wysiwyg-controls">
-            <a href='#' onClick={() => this._exec('foreColor', 'red')}>red</a>
-            <a href='#' onClick={() => this._exec('bold')} title="⌘B">B</a>
-            <a href='#' onClick={() => this._exec('insertHTML', 'WHAT')} title="⌘B">insertHTML</a>
-            <a href='#' onClick={() => this._exec('italic')}>I</a>
-            <a href='#' onClick={() => this._exec('underline')}>U</a>
-            <a href='#' onClick={() => this._exec('strikeThrough')}>S</a>
-            <a href='#' onClick={() => this._exec('justifyLeft')} title="Align Left">
-              <i className="menu-left"></i>
-            </a>
-            <a href='#' onClick={() => this._exec('justifyCenter')} title="Center">
-              <i className="menu-center"></i>
-            </a>
-            <a href='#' onClick={() => this._exec('justifyRight')} title="Align Right">
-              <i className="menu-right"></i>
-            </a>
-            <a href='#' onClick={() => this._exec('justifyFull')} title="Justify">
-              <i className="menu-justify"></i>
-            </a>
-            <FontSize onChange={this._exec} />
-            <Formatting onChange={this._exec} />
-          </div>
-          <Editable
-            className="wysiwyg-content"
-            html={this.state.html}
-            onChange={this._handleOnChange}
-            onKeyUp={this._handleKeyUp}
-            onMouseUp={this._handleMouseUp}
-          />
-        </div>
+        <WYSIWYG
+          html={this.state.html}
+          onChange={html => this.setState({html})}
+        />
         <div className="current-html">
           <p>
             <strong>raw html:</strong>
             <textarea
               style={{width: '100%', height: 150}}
               value={this.state.html}
-              onChange={this._handleOnChange}
+              onChange={this._handleOnTextAreaChange}
             />
           </p>
           <p>

@@ -5,88 +5,50 @@ $border-color: #C2CACF;
   box-sizing: border-box;
 }
 
+body {
+  font-family: 'Helvetica', sans-serif;
+}
+
+.btn {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &:focus {
+    border: 1px solid $border-color;
+  }
+}
+
+.btn--active {
+  fill: #00D473
+}
+
 .wysiwyg-editor {
   display: block;
-  width: 400px;
+  max-width: 460px;
   margin: 100px auto 0;
 }
 
 .wysiwyg-controls {
   display: block;
   width: 100%;
-  padding: 12px 6px;
+  padding: 6px;
   border: 1px solid $border-color;
   border-bottom: none;
   border-radius: 3px 3px 0 0;
   background: #fff;
-  
-  a {
-    display: inline-block;
-    width: 35px;
-    height: 35px;
-    vertical-align: top;
-    line-height: 38px;
-    text-decoration: none;
-    text-align: center;
-    cursor: pointer;
-    color: $controls-color;
-  }
-  [data-role="bold"] {
-    font-weight: bold;
-  }
-  [data-role="italic"] {
-    font-style: italic;
-  }
-  [data-role="underline"] {
-    text-decoration: underline;
-  }
-}
-
-[class^="menu"] {
-  position: relative;
-  top: 48%;
-  
-  display: block;
-  width: 65%;
-  height: 2px;
-  margin: 0 auto;
-  background: $controls-color;
-  
-  &:before {
-    @extend [class^="menu"];
-    content: '';
-    top: -5px;
-    width: 80%;
-  }
-  &:after {
-    @extend [class^="menu"];
-    content: '';
-    top: 3px;
-    width: 80%;
-  }
-}
-.menu-left {
-  &:before, &:after {
-    margin-right: 4px;
-  }
-}
-.menu-right {
-  &:before, &:after {
-    margin-left: 4px;
-  }
-}
-
-.menu-justify {
-  &:before, &:after {
-    width: 100%;
-    margin-left: 0;
-  }
 }
 
 .wysiwyg-content {
   max-width: 100%;
   width: 100%;
   height: auto;
+  min-height: 200px;
   padding: 12px;
   resize: both;
   overflow: auto;
@@ -94,7 +56,11 @@ $border-color: #C2CACF;
   font-size: 12px;
   border: 1px solid $border-color;
   border-radius: 0 0 3px 3px;
-  background: #F2F4F6;
+  outline: 0;
+
+  &:focus {
+    border-color: red;
+  }
 }
 
 .current-html {
@@ -112,4 +78,79 @@ $border-color: #C2CACF;
     color: #a0a0a0;
     font-style: italic;
   }
+}
+
+.react-select {
+  display: inline-block
+}
+
+.popout {
+  border: 1px solid #D4D9DC;
+  box-shadow: 0 2px 4px 0 rgba(218, 221, 222, 0.35);
+  background-color: #fff;
+}
+
+.popout__links {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.popout__link {
+  display: flex;
+  padding: 3px 6px;
+  justify-content: space-between;
+  cursor: pointer;
+
+  &:hover {
+    background: #F1F1F1;
+  }
+}
+
+.popout__link__label {
+  
+}
+
+.popout__link__icon {
+  
+}
+
+
+//////////////////////////
+// Color Picker
+.popout__links--color {
+  max-width: 162px;
+  padding: 3px;
+  font-size: 0;
+}
+
+.color-picker {
+
+}
+
+.color-picker__swatch {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: 3px;
+}
+
+.color-picker__types {
+  font-size: 0;
+}
+
+.color-picker__type {
+  display: inline-block;
+  width: 50%;
+  padding: 8px 3px;
+  font-size: 12px;
+  text-align: center;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+
+.color-picker__type--active {
+  border-bottom-color: #00D473;
+  cursor: default;
 }
