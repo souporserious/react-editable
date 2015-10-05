@@ -1,6 +1,49 @@
 import React, { Component, PropTypes } from 'react'
 import getSelectionNode from './get-selection-node'
 
+require('mutationobserver-shim')
+
+function saveSelection() {
+  let savedRange = null
+
+  if(window.getSelection) {
+    savedRange = window.getSelection().getRangeAt(0)
+  }
+  else if(document.selection) { 
+    savedRange = document.selection.createRange()
+  } 
+
+  return savedRange
+}
+
+function restoreSelection(node, savedRange) {
+  // All major browsers
+  if(window.getSelection) {
+    let s = window.getSelection()
+    
+    if(s.rangeCount > 0) {
+      s.removeAllRanges()
+    }
+
+    s.addRange(savedRange)
+  }
+  // Non IE and no-selection
+  else if(document.createRange) {
+    window.getSelection().addRange(savedRange)
+  }
+  // IE
+  else if(document.selection) {
+    savedRange.select()
+  }
+}
+
+
+var isInFocus = false;
+function onDivBlur()
+{
+    isInFocus = false;
+}
+
 class Editable extends React.Component {
   static propTypes = {
     component: PropTypes.string,
@@ -24,6 +67,14 @@ class Editable extends React.Component {
 
   componentDidMount() {
     this._node = React.findDOMNode(this)
+
+    this._observer = new MutationObserver(this._onMutation);
+    this._observer.observe(this._node, {
+        childList: true,
+        attributes: true,
+        characterData: true,
+        subtree: true
+    })
   }
   
   componentDidUpdate() {
@@ -31,57 +82,51 @@ class Editable extends React.Component {
       this._node.innerHTML = this.props.html
     }
   }
+
+  componentWillUnmount() {
+    this._observer.disconnect()
+  }
+
+  _onMutation = () => {
+    this._emitChange('MutationObserver', null)
+  }
   
   _emitChange = (type, e) => {
     const html = this._node.innerHTML
+    const event = this.props[type]
+    const selection = getSelectionNode()
 
-    if(html !== this._lastHTML) {
-      e.target.value = html
-      this.props.onChange(e)
+    if(type !== 'MutationObserver') {
+      this._savedRange = saveSelection()
+    }
+    
+    // call on change if html has changed
+    if(html !== this._lastHTML || type === 'MutationObserver') {
+      this.props.onChange(html, selection)
     }
 
-    // call desired event if requested
-    if(this.props[type]) {
-      this.props[type](e)
+    // call original event
+    if(event) {
+      event(e, selection)
     }
+
+    restoreSelection(this._node, this._savedRange)
 
     this._lastHTML = html
-  }
-
-  _mouseChange = (type, e) => {
-    let selection = null
-
-    if(e.type === 'mousedown') {
-      this._dragging = true
-    }
-
-    if(this._dragging) {
-      selection = getSelectionNode(document.getSelection())
-    }
-
-    if(e.type === 'mouseup') {
-      this._dragging = false
-    }
-
-    // call desired event if requested
-    if(this.props[type]) {
-      this.props[type](e, selection)
-    }
   }
   
   render() {
     const { editable, html, placeholder } = this.props
-    
+
     return React.createElement(
       this.props.component,
       {
         ...this.props,
         contentEditable: editable,
         onBlur: this._emitChange.bind(null, 'onBlur'),
-        onInput: this._emitChange.bind(null, 'onInput'),
-        onMouseDown: this._mouseChange.bind(null, 'onMouseDown'),
-        onMouseMove: this._mouseChange.bind(null, 'onMouseMove'),
-        onMouseUp: this._mouseChange.bind(null, 'onMouseUp'),
+        onKeyDown: this._emitChange.bind(null, 'onKeyDown'),
+        onKeyUp: this._emitChange.bind(null, 'onKeyUp'),
+        onMouseUp: this._emitChange.bind(null, 'onMouseUp'),
         dangerouslySetInnerHTML: {__html: html},
         'data-placeholder': placeholder
       }

@@ -1,4 +1,5 @@
-export default function getSelectionNode(selection) {
+export default function getSelectionNode() {
+  const selection = document.getSelection()
   let node = selection.anchorNode
   let content = node && node.textContent
 
@@ -6,6 +7,6 @@ export default function getSelectionNode(selection) {
   if(/^\s*$/.test(content)) {
     node = node.nextSibling ? node.nextSibling : node.previousSibling
   }
-  
-  return node && (node.nodeType == 3 ? node.parentNode : node)
+
+  return node && (node.nodeType === 3 ? node.parentNode : node)
 }
