@@ -5,9 +5,12 @@ class Portal extends React.Component {
     const { className, style, renderTo } = this.props
     const portal = document.createElement('div')
 
+    // add a className to help identify it
+    portal.className = 'react-portal'
+
     // take care of any classes or styles passed in
     if(className) {
-      portal.className = className
+      portal.className += ` ${className}`
     }
     if(style) {
       Object.keys(style).forEach(prop =>

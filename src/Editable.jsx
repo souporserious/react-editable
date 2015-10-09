@@ -1,8 +1,6 @@
 import React, { Component, PropTypes } from 'react'
 import getSelectionNode from './get-selection-node'
 
-require('mutationobserver-shim')
-
 function saveSelection() {
   let savedRange = null
 
@@ -68,13 +66,13 @@ class Editable extends React.Component {
   componentDidMount() {
     this._node = React.findDOMNode(this)
 
-    this._observer = new MutationObserver(this._onMutation);
-    this._observer.observe(this._node, {
-        childList: true,
-        attributes: true,
-        characterData: true,
-        subtree: true
-    })
+    // this._observer = new MutationObserver(this._onMutation);
+    // this._observer.observe(this._node, {
+    //     childList: true,
+    //     attributes: true,
+    //     characterData: true,
+    //     subtree: true
+    // })
   }
   
   componentDidUpdate() {
@@ -96,9 +94,9 @@ class Editable extends React.Component {
     const event = this.props[type]
     const selection = getSelectionNode()
 
-    if(type !== 'MutationObserver') {
-      this._savedRange = saveSelection()
-    }
+    // if(type !== 'MutationObserver') {
+    //   this._savedRange = saveSelection()
+    // }
     
     // call on change if html has changed
     if(html !== this._lastHTML || type === 'MutationObserver') {
@@ -110,7 +108,7 @@ class Editable extends React.Component {
       event(e, selection)
     }
 
-    restoreSelection(this._node, this._savedRange)
+    //restoreSelection(this._node, this._savedRange)
 
     this._lastHTML = html
   }
@@ -124,6 +122,7 @@ class Editable extends React.Component {
         ...this.props,
         contentEditable: editable,
         onBlur: this._emitChange.bind(null, 'onBlur'),
+        onInput: this._emitChange.bind(null, 'onInput'),
         onKeyDown: this._emitChange.bind(null, 'onKeyDown'),
         onKeyUp: this._emitChange.bind(null, 'onKeyUp'),
         onMouseUp: this._emitChange.bind(null, 'onMouseUp'),

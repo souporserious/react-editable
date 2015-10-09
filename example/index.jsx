@@ -22,19 +22,11 @@ class WYSIWYG extends React.Component {
     this.props.onChange(html)
   }
   
-  _handleClear = (e) => {
-    this._onChange('')
-  }
-  
   _handleOnChange = (html, selection) => {
     const currentStyles = getCurrentStyles(selection, React.findDOMNode(this.refs['editor']))
     //console.log(currentStyles)
-    //this.setState({currentStyles})
+    this.setState({currentStyles})
     this._onChange(html)
-  }
-
-  _handleOnTextAreaChange = (e) => {
-    this._onChange(e.target.value)
   }
 
   _handleKeyUp = (e) => {
@@ -137,6 +129,14 @@ class App extends React.Component {
     `,
     selection: window.getSelection(),
     currentStyles: []
+  }
+
+  _handleClear = (e) => {
+    this._onChange('')
+  }
+
+  _handleOnTextAreaChange = (e) => {
+    this._onChange(e.target.value)
   }
 
   render() {

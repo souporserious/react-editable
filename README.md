@@ -1,4 +1,4 @@
-## React Editable 1.0.1
+## React Editable 1.0.2
 
 Build flexible WYSIWYG editors with ease
 
