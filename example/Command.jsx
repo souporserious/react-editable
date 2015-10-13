@@ -1,5 +1,6 @@
 import React from 'react'
-import { Icons } from '../src/react-editable'
+import wrapRange from 'wrap-range-text'
+import { Icons, utils } from '../src/react-editable'
 
 function toUpperCaseEachWord(str) {
   const toUpperCaseFirstChar = (str) =>
@@ -10,7 +11,17 @@ function toUpperCaseEachWord(str) {
 
 class Command extends React.Component {
   _exec(role, value = null) {
-    document.execCommand(role, false, value);
+
+    if(role === 'blockquote') {
+      const wrapper = document.createElement(role)
+      wrapRange(wrapper)
+    } else {
+      if(role === 'insertHTML') {
+        utils.insertHTML(value)
+      } else {
+        document.execCommand(role, false, value)
+      }
+    }
   }
 
   _getIcon(role) {
@@ -42,7 +53,8 @@ class Command extends React.Component {
         style={style}
         onClick={() => this._exec(role, value)}
       >
-        {React.createElement(Icons[Type])}
+        {/*React.createElement(Icons[Type])*/}
+        {role}
       </button>
     )
   }

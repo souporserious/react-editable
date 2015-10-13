@@ -4,7 +4,7 @@ import Color from './Color'
 import Size from './Size'
 import Align from './Align'
 import { Editable, Icons, utils } from '../src/react-editable'
-const { getCaret, getCurrentStyles, stripHTML } = utils
+const { getCaret, getCurrentStyles, insertHTML, stripHTML } = utils
 
 import './main.scss';
 
@@ -15,7 +15,11 @@ class WYSIWYG extends React.Component {
   }
   
   _exec(role, value = null) {
-    document.execCommand(role, false, value);
+    if(role === 'insertHTML') {
+      insertHTML(value)
+    } else {
+      document.execCommand(role, false, value)
+    }
   }
 
   _onChange(html) {
@@ -97,7 +101,15 @@ class WYSIWYG extends React.Component {
               this._exec('createLink', prompt('Please enter a URL', 'http://'))
             }}
           />
-          <Icons.Blockquote />
+          <Command
+            active={currentStyles}
+            role="blockquote"
+          />
+          <Command
+            active={currentStyles}
+            role="insertHTML"
+            value="<b>COOL</b>"
+          />
           <Command
             active={currentStyles}
             role="removeFormat"
