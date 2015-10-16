@@ -3,50 +3,23 @@ import Command from './Command'
 import Color from './Color'
 import Size from './Size'
 import Align from './Align'
+import wysiwyg from 'wysiwyg.js'
+import { Editable, Icons, utils } from '../src/react-editable'
 import { Editable, Icons, utils } from '../src/react-editable'
 const { getCaret, getCurrentStyles, insertHTML, stripHTML } = utils
 
 import './main.scss';
 
 class WYSIWYG extends React.Component {
-  state = {
-    selection: window.getSelection(),
-    currentStyles: []
-  }
-  
   _exec(role, value = null) {
-    if(role === 'insertHTML') {
-      insertHTML(value)
-    } else {
-      document.execCommand(role, false, value)
-    }
-  }
-
-  _onChange(html) {
-    this.props.onChange(html)
+    this._editor[role](value)
   }
   
-  _handleOnChange = (html, selection) => {
-    const currentStyles = getCurrentStyles(selection, React.findDOMNode(this.refs['editor']))
-    //console.log(currentStyles)
-    this.setState({currentStyles})
-    this._onChange(html)
-  }
-
-  _handleKeyUp = (e) => {
-    const caret = getCaret(e.target)
-    const currentChar = stripHTML(e.target.innerHTML).substr(caret.offset-1, 1)
-    //console.log(currentChar)
-  }
-
-  _handleMouseUp = (e, selection) => {
-    const currentStyles = getCurrentStyles(selection, React.findDOMNode(this.refs['editor']))
-    //this.setState({currentStyles})
+  _handleOnChange = (html, nodes) => {
+    this.props.onChange(html)
   }
 
   render() {
-    const { currentStyles } = this.state
-
     return(
       <div className="wysiwyg-editor">
         <div className="wysiwyg-controls">
@@ -54,43 +27,46 @@ class WYSIWYG extends React.Component {
             onChange={value => this._exec('fontSize', value)}
           />
           <Command
-            active={currentStyles}
             role="bold"
             title="⌘B"
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
             role="italic"
             title="⌘I"
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
             role="underline"
             title="⌘U"
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
-            role="strikeThrough"
+            role="strikethrough"
             title="⌘S"
+            editor={this._editor}
           />
           <Align
-            onChange={role => this._exec(role)}
+            onChange={value => this._exec('align', value)}
           />
           <Command
-            active={currentStyles}
-            role="insertOrderedList"
+            role="insertList"
+            value={true}
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
-            role="insertUnorderedList"
+            role="insertList"
+            value={false}
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
-            role="outdent"
-          />
-          <Command
-            active={currentStyles}
             role="indent"
+            value={true}
+            editor={this._editor}
+          />
+          <Command
+            role="indent"
+            editor={this._editor}
           />
           <Color
             onChange={(role, value) => this._exec(role, value)}
@@ -98,31 +74,24 @@ class WYSIWYG extends React.Component {
           <Icons.CreateLink 
             onMouseDown={(e) => {
               e.preventDefault()
-              this._exec('createLink', prompt('Please enter a URL', 'http://'))
+              this._exec('insertLink', prompt('Please enter a URL', 'http://'))
             }}
           />
           <Command
-            active={currentStyles}
-            role="blockquote"
+            role="format"
+            value="blockquote"
+            editor={this._editor}
           />
           <Command
-            active={currentStyles}
-            role="insertHTML"
-            value="<b>COOL</b>"
-          />
-          <Command
-            active={currentStyles}
             role="removeFormat"
+            editor={this._editor}
           />
         </div>
         <Editable
-          ref="editor"
+          getEditor={e => this._editor = e}
           className="wysiwyg-content"
           html={this.props.html}
           onChange={this._handleOnChange}
-          onKeyUp={this._handleKeyUp}
-          onMouseUp={this._handleMouseUp}
-          onBlur={() => this.setState({currentStyles: []})}
         />
       </div>
     )
@@ -143,12 +112,16 @@ class App extends React.Component {
     currentStyles: []
   }
 
-  _handleClear = (e) => {
-    this._onChange('')
+  _clearHtml = (e) => {
+    this.setState({html: ''})
+  }
+
+  _setHtml = () => {
+    this.setState({html: '<b>Bold Tags Are Cool Mannn</b>'})
   }
 
   _handleOnTextAreaChange = (e) => {
-    this._onChange(e.target.value)
+    this.setState({html: e.target.value})
   }
 
   render() {
@@ -170,7 +143,8 @@ class App extends React.Component {
           <p>
             <strong>word count:</strong> {stripHTML(this.state.html).split(' ').length}
           </p>
-          <button onClick={this._handleClear}>Clear Content</button>
+          <button onClick={this._clearHtml}>Clear Content</button>
+          <button onClick={this._setHtml}>Set HTML</button>
         </div>
       </div>
     )

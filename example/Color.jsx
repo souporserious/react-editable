@@ -15,7 +15,7 @@ class Color extends React.Component {
         '#CCD1D9', '#AAB2BD', '#656D78', '#434A54'
       ],
       selected: '#ED5565',
-      type: 'foreColor'
+      type: 'forecolor'
     }
     this._handleOnChange = this._handleOnChange.bind(this)
     this._renderOption = this._renderOption.bind(this)
@@ -67,13 +67,13 @@ class Color extends React.Component {
       <footer className="color-picker__types">
         <div
           onMouseDown={e => e.preventDefault()}
-          onClick={() => this.setState({type: 'foreColor'})}
-          className={className + (type === 'foreColor' ? ` ${className}--active` : '')}
+          onClick={() => this.setState({type: 'forecolor'})}
+          className={className + (type === 'forecolor' ? ` ${className}--active` : '')}
         >Foreground</div>
         <div
           onMouseDown={e => e.preventDefault()}
-          onClick={() => this.setState({type: 'hiliteColor'})}
-          className={className + (type === 'hiliteColor' ? ` ${className}--active` : '')}
+          onClick={() => this.setState({type: 'highlight'})}
+          className={className + (type === 'highlight' ? ` ${className}--active` : '')}
         >Background</div>
       </footer>
     )

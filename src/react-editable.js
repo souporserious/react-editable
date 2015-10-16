@@ -7,4 +7,4 @@ import * as Icons from './Icons/icons'
 
 const utils = { getCaret, getCurrentStyles, insertHTML, stripHTML }
 
-export { Editable, Icons, utils }
+export default Editable

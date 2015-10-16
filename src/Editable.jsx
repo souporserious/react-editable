@@ -1,133 +1,80 @@
 import React, { Component, PropTypes } from 'react'
-import getSelectionNode from './get-selection-node'
+import wysiwyg from 'wysiwyg.js'
 
-function saveSelection() {
-  let savedRange = null
-
-  if(window.getSelection) {
-    savedRange = window.getSelection().getRangeAt(0)
-  }
-  else if(document.selection) { 
-    savedRange = document.selection.createRange()
-  } 
-
-  return savedRange
-}
-
-function restoreSelection(node, savedRange) {
-  // All major browsers
-  if(window.getSelection) {
-    let s = window.getSelection()
-    
-    if(s.rangeCount > 0) {
-      s.removeAllRanges()
-    }
-
-    s.addRange(savedRange)
-  }
-  // Non IE and no-selection
-  else if(document.createRange) {
-    window.getSelection().addRange(savedRange)
-  }
-  // IE
-  else if(document.selection) {
-    savedRange.select()
-  }
-}
-
-
-var isInFocus = false;
-function onDivBlur()
-{
-    isInFocus = false;
-}
+const noop = () => null
 
 class Editable extends React.Component {
   static propTypes = {
     component: PropTypes.string,
     editable: PropTypes.bool,
     placeholder: PropTypes.string,
+    getEditor: PropTypes.func,
     onChange: PropTypes.func
   }
   static defaultProps = {
     component: 'div',
     editable: true,
     placeholder: '',
-    onChange: () => null
+    getEditor: noop,
+    onChange: noop
   }
-  _node = null
-  _lastHTML = ''
+  _editor = null
+  _lastHTML = null
 
   shouldComponentUpdate(nextProps) {
     return this.props.editable !== nextProps.editable ||
-           this._node.innerHTML !== nextProps.html
+           this._editor.getHTML() !== nextProps.html
   }
 
   componentDidMount() {
-    this._node = React.findDOMNode(this)
+    const { html, getEditor } = this.props
+    const onSelection = this._handleSelection.bind(this)
 
-    // this._observer = new MutationObserver(this._onMutation);
-    // this._observer.observe(this._node, {
-    //     childList: true,
-    //     attributes: true,
-    //     characterData: true,
-    //     subtree: true
-    // })
+    this._editor = wysiwyg({
+      element: React.findDOMNode(this),
+      onSelection
+    })
+
+    getEditor(this._editor.setHTML(html))
   }
   
   componentDidUpdate() {
-    if(this._node.innerHTML !== this.props.html) {
-      this._node.innerHTML = this.props.html
+    const { html } = this.props
+
+    if(this._editor.getHTML() !== html) {
+      this._editor.setHTML(html)
     }
   }
 
-  componentWillUnmount() {
-    this._observer.disconnect()
-  }
-
-  _onMutation = () => {
-    this._emitChange('MutationObserver', null)
+  _handleSelection(collapsed, rect, nodes, rightclick) {
+    const html = this._editor.getHTML()
+    this.props.onChange(html, nodes)
   }
   
   _emitChange = (type, e) => {
-    const html = this._node.innerHTML
+    const html = this._editor.getHTML()
     const event = this.props[type]
-    const selection = getSelectionNode()
-
-    // if(type !== 'MutationObserver') {
-    //   this._savedRange = saveSelection()
-    // }
     
     // call on change if html has changed
-    if(html !== this._lastHTML || type === 'MutationObserver') {
-      this.props.onChange(html, selection)
+    if(html !== this._lastHTML) {
+      this.props.onChange(html)
     }
 
     // call original event
     if(event) {
-      event(e, selection)
+      event(e)
     }
-
-    //restoreSelection(this._node, this._savedRange)
 
     this._lastHTML = html
   }
-  
-  render() {
-    const { editable, html, placeholder } = this.props
 
+  render() {
     return React.createElement(
       this.props.component,
       {
         ...this.props,
-        contentEditable: editable,
         onBlur: this._emitChange.bind(null, 'onBlur'),
-        onInput: this._emitChange.bind(null, 'onInput'),
-        onKeyDown: this._emitChange.bind(null, 'onKeyDown'),
-        onKeyUp: this._emitChange.bind(null, 'onKeyUp'),
-        onMouseUp: this._emitChange.bind(null, 'onMouseUp'),
-        dangerouslySetInnerHTML: {__html: html},
-        'data-placeholder': placeholder
+        onInput: this._emitChange.bind(null, 'onInput')
       }
     )
   }
