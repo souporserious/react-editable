@@ -28,14 +28,37 @@ class Editable extends React.Component {
 
   componentDidMount() {
     const { html, getEditor } = this.props
+    const element = React.findDOMNode(this)
     const onSelection = this._handleSelection.bind(this)
 
-    this._editor = wysiwyg({
-      element: React.findDOMNode(this),
-      onSelection
-    })
-
+    this._editor = wysiwyg({element, onSelection})
     getEditor(this._editor.setHTML(html))
+
+    // normalize editing creation from blank state
+    element.addEventListener('keypress', e => {
+      if(element.innerHTML === '' ||
+         element.innerHTML === '<br>') {
+
+        e.preventDefault()
+
+        const char = String.fromCharCode(e.which)
+        const node = document.createElement('div')
+        const sel = window.getSelection()
+        let range = sel.getRangeAt(0)
+
+        // insert character into node
+        node.innerHTML = char
+
+        // insert node into range
+        range.insertNode(node)
+        range.setStart(node, 1)
+        range.collapse(true)
+
+        // move selection to end of node
+        sel.removeAllRanges()
+        sel.addRange(range)
+      }
+    })
   }
   
   componentDidUpdate() {

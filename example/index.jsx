@@ -5,7 +5,6 @@ import Size from './Size'
 import Align from './Align'
 import wysiwyg from 'wysiwyg.js'
 import { Editable, Icons, utils } from '../src/react-editable'
-import { Editable, Icons, utils } from '../src/react-editable'
 const { getCaret, getCurrentStyles, insertHTML, stripHTML } = utils
 
 import './main.scss';
@@ -101,13 +100,7 @@ class WYSIWYG extends React.Component {
 class App extends React.Component {
   state = {
     html:
-    `
-      <b>Let's make a statement!</b>
-      <br/>
-      <i>This is an italicized sentence.</i>
-      <br/>
-      <u>Very important information.</u>
-    `,
+    ``,
     selection: window.getSelection(),
     currentStyles: []
   }
