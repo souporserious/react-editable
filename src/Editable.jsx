@@ -6,6 +6,7 @@ const noop = () => null
 class Editable extends React.Component {
   static propTypes = {
     component: PropTypes.string,
+    html: PropTypes.string,
     editable: PropTypes.bool,
     placeholder: PropTypes.string,
     getEditor: PropTypes.func,
@@ -13,6 +14,7 @@ class Editable extends React.Component {
   }
   static defaultProps = {
     component: 'div',
+    html: '',
     editable: true,
     placeholder: '',
     getEditor: noop,
@@ -31,41 +33,22 @@ class Editable extends React.Component {
     const element = React.findDOMNode(this)
     const onSelection = this._handleSelection.bind(this)
 
+    // initialize editor
     this._editor = wysiwyg({element, onSelection})
+
+    // pass editor up to allow format execution 
     getEditor(this._editor.setHTML(html))
-
-    // normalize editing creation from blank state
-    element.addEventListener('keypress', e => {
-      if(element.innerHTML === '' ||
-         element.innerHTML === '<br>') {
-
-        e.preventDefault()
-
-        const char = String.fromCharCode(e.which)
-        const node = document.createElement('div')
-        const sel = window.getSelection()
-        let range = sel.getRangeAt(0)
-
-        // insert character into node
-        node.innerHTML = char
-
-        // insert node into range
-        range.insertNode(node)
-        range.setStart(node, 1)
-        range.collapse(true)
-
-        // move selection to end of node
-        sel.removeAllRanges()
-        sel.addRange(range)
-      }
-    })
   }
   
-  componentDidUpdate() {
-    const { html } = this.props
+  componentDidUpdate(prevProps) {
+    const { html, editable } = this.props
 
     if(this._editor.getHTML() !== html) {
       this._editor.setHTML(html)
+    }
+
+    if(prevProps.editable !== editable) {
+      this._editor.readOnly(editable)
     }
   }
 
