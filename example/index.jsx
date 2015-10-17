@@ -77,7 +77,7 @@ class WYSIWYG extends React.Component {
             }}
           />
           <Command
-            role="format"
+            role="formatBlock"
             value="blockquote"
             editor={this._editor}
           />
@@ -100,7 +100,13 @@ class WYSIWYG extends React.Component {
 class App extends React.Component {
   state = {
     html:
-    ``,
+    `
+      <b>Let's make a statement!</b>
+      <br/>
+      <i>This is an italicized sentence.</i>
+      <br/>
+      <u>Very important information.</u>
+    `,
     selection: window.getSelection(),
     currentStyles: []
   }

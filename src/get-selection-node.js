@@ -1,6 +1,5 @@
 export default function getSelectionNode() {
-  const selection = document.getSelection()
-  let node = selection.anchorNode
+  let node = document.getSelection().anchorNode
   let content = node && node.textContent
 
   // use sibling if space, tab, or newline

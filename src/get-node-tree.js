@@ -1,4 +1,4 @@
-export default function getNodeTree(startNode, endNode = node.parentNode) {
+export default function getNodeTree(startNode, endNode = document.activeElement) {
   let currNode = startNode
   let tree = []
   

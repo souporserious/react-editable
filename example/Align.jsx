@@ -7,12 +7,12 @@ class Align extends React.Component {
     super(props)
     this.state = {
       options: [
-        { value: 'justifyLeft', label: <Icons.JustifyLeft /> },
-        { value: 'justifyCenter', label: <Icons.JustifyCenter /> },
-        { value: 'justifyRight', label: <Icons.JustifyRight /> },
-        { value: 'justifyFull', label: <Icons.JustifyFull /> }
+        { value: 'left', label: <Icons.JustifyLeft /> },
+        { value: 'center', label: <Icons.JustifyCenter /> },
+        { value: 'right', label: <Icons.JustifyRight /> },
+        { value: 'justify', label: <Icons.JustifyFull /> }
       ],
-      selected: 'justifyLeft'
+      selected: 'justify'
     }
     this._handleOnChange = this._handleOnChange.bind(this)
     this._renderOption = this._renderOption.bind(this)
