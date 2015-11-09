@@ -4,6 +4,7 @@ import Color from './Color'
 import Size from './Size'
 import Align from './Align'
 import wysiwyg from 'wysiwyg.js'
+import { html as beautifyHTML } from 'js-beautify'
 import { Editable, Icons, utils } from '../src/react-editable'
 const { getCaret, getCurrentStyles, insertHTML, stripHTML } = utils
 
@@ -101,7 +102,7 @@ class App extends React.Component {
   state = {
     html:
     `
-      <b>Let's make a statement!</b>
+      <h1>Let's make a statement!</h1>
       <br/>
       <i>This is an italicized sentence.</i>
       <br/>

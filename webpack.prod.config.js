@@ -24,7 +24,8 @@ var config = {
     extensions: ['', '.js', '.jsx']
   },
   externals: {
-    'react': 'React'
+    'react': 'React',
+    'react-dom': 'ReactDOM'
   },
 };
 
@@ -36,7 +37,7 @@ if(TARGET === 'minify') {
       warnings: false
     },
     mangle: {
-      except: ['React', 'Editable']
+      except: ['React', 'ReactDOM', 'Editable']
     }
   }));
 }

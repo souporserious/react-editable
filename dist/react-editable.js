@@ -1,13 +1,13 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("React"));
+		module.exports = factory(require("React"), require("ReactDOM"));
 	else if(typeof define === 'function' && define.amd)
-		define(["React"], factory);
+		define(["React", "ReactDOM"], factory);
 	else if(typeof exports === 'object')
-		exports["Editable"] = factory(require("React"));
+		exports["Editable"] = factory(require("React"), require("ReactDOM"));
 	else
-		root["Editable"] = factory(root["React"]);
-})(this, function(__WEBPACK_EXTERNAL_MODULE_2__) {
+		root["Editable"] = factory(root["React"], root["ReactDOM"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_3__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -54,6 +54,17 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
+	// import Editable from './Editable'
+	// import getCaret from './get-caret-coords'
+	// import getCurrentStyles from './get-current-styles'
+	// import insertHTML from './insert-html'
+	// import stripHTML from './strip-html'
+	// import * as Icons from './Icons/icons'
+
+	// const utils = { getCaret, getCurrentStyles, insertHTML, stripHTML }
+
+	// export { Editable, Icons, utils }
+
 	'use strict';
 
 	Object.defineProperty(exports, '__esModule', {
@@ -95,13 +106,24 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _wysiwygJs = __webpack_require__(3);
+	var _reactDom = __webpack_require__(3);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	var _wysiwygJs = __webpack_require__(4);
 
 	var _wysiwygJs2 = _interopRequireDefault(_wysiwygJs);
 
 	var noop = function noop() {
 	  return null;
 	};
+
+	// TODO:
+	// http://www.neotericdesign.com/blog/2013/3/working-around-chrome-s-contenteditable-span-bug
+	// http://stackoverflow.com/questions/15015019/prevent-chrome-from-wrapping-contents-of-joined-p-with-a-span
+	// http://codereview.stackexchange.com/questions/28882/custom-wysiwyg-editor
+	// https://github.com/adamsanderson/wysiwyg
+	// https://github.com/maccman/wysiwyg/blob/master/src/wysiwyg.coffee
 
 	var Editable = (function (_React$Component) {
 	  _inherits(Editable, _React$Component);
@@ -137,31 +159,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	  _createClass(Editable, [{
 	    key: 'shouldComponentUpdate',
 	    value: function shouldComponentUpdate(nextProps) {
-	      return this.props.editable !== nextProps.editable || this._editor.getHTML() !== nextProps.html;
+	      return this.props.readOnly !== nextProps.readOnly || this._editor.getHTML() !== nextProps.html;
 	    }
 	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
 	      var _props = this.props;
 	      var html = _props.html;
+	      var readOnly = _props.readOnly;
 	      var getEditor = _props.getEditor;
 
+	      var element = _reactDom2['default'].findDOMNode(this);
 	      var onSelection = this._handleSelection.bind(this);
 
-	      this._editor = (0, _wysiwygJs2['default'])({
-	        element: _react2['default'].findDOMNode(this),
-	        onSelection: onSelection
-	      });
+	      // initialize editor
+	      this._editor = (0, _wysiwygJs2['default'])({ element: element, onSelection: onSelection, readOnly: readOnly });
 
+	      // pass editor up to allow format execution
 	      getEditor(this._editor.setHTML(html));
 	    }
 	  }, {
 	    key: 'componentDidUpdate',
-	    value: function componentDidUpdate() {
-	      var html = this.props.html;
+	    value: function componentDidUpdate(prevProps) {
+	      var _props2 = this.props;
+	      var html = _props2.html;
+	      var readOnly = _props2.readOnly;
 
 	      if (this._editor.getHTML() !== html) {
 	        this._editor.setHTML(html);
+	      }
+
+	      if (prevProps.readOnly !== readOnly) {
+	        this._editor.readOnly(readOnly);
 	      }
 	    }
 	  }, {
@@ -182,8 +211,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'propTypes',
 	    value: {
 	      component: _react.PropTypes.string,
-	      editable: _react.PropTypes.bool,
-	      placeholder: _react.PropTypes.string,
+	      html: _react.PropTypes.string,
+	      readOnly: _react.PropTypes.bool,
 	      getEditor: _react.PropTypes.func,
 	      onChange: _react.PropTypes.func
 	    },
@@ -192,8 +221,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    key: 'defaultProps',
 	    value: {
 	      component: 'div',
-	      editable: true,
-	      placeholder: '',
+	      html: '',
+	      readOnly: false,
 	      getEditor: noop,
 	      onChange: noop
 	    },
@@ -214,6 +243,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 3 */
+/***/ function(module, exports) {
+
+	module.exports = __WEBPACK_EXTERNAL_MODULE_3__;
+
+/***/ },
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;'use strict';
